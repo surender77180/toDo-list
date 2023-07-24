@@ -1,0 +1,44 @@
+body {
+    background: lightgray;
+  }
+
+.display{
+    display: flex;
+    justify-content: center;
+} 
+  
+h1{
+    font-size: 3em;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.container input{
+    border-radius: 0.6em;
+    margin: 0px 10px;
+    font-size: 1em;
+}
+
+.show-data{
+    font-size: 2.3em;
+}
+
+.btn{
+    padding: 0.5em 1em ;
+}
+
+form{
+    display: flex;
+    gap: 1.5em;
+    align-items: center;
+    height: 2em;
+}
+
+.checkbox{
+    transform: scale(2.6);
+}
+
+.del-btn{
+    padding: 0.5em 1em;
+    height: 100%;
+    margin: 0 1em;
+}

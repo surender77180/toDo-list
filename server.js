@@ -60,15 +60,15 @@ app.get("/", (req, res) => {
 
 app.get("/login", (req, res) => {
 
-    if (req.session.isLoggedIn){
+    if (req.session.isLoggedIn) {
         res.redirect("/");
-    }else{
+    } else {
         res.sendFile(path.join(__dirname, "login.html"));
     }
 });
 
 app.get("/items", (req, res) => {
-    const data = JSON.stringify(Item.li);
+    const data = JSON.stringify(Item.list);
     res.send(data);
 });
 
@@ -105,7 +105,7 @@ app.listen(port);
 
 // authorise session//
 app.post("/login", function (req, res) {
-    const username = req.body.username;
+    const email = req.body.email;
     const password = req.body.password;
 
     fs.readFile("./password.json", (err, data) => {
@@ -113,14 +113,14 @@ app.post("/login", function (req, res) {
             res.send("file not readable...");
         } else {
             const users = JSON.parse(data);
-            const user = users[username];
+            const user = users[email];
             if (!user) {
                 res.send("User Not Found...");
             } else if (user.password != password) {
                 res.send("wrong pass...");
             } else {
                 req.session.isLoggedIn = true;
-                req.session.username = username;
+                req.session.email = email;
                 res.redirect("/")
             }
         }
@@ -131,25 +131,25 @@ app.post("/login", function (req, res) {
 app.post("/adduser", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-    const mobileNo = req.body.mobileno;
+    const email = req.body.email;
 
     fs.readFile("./password.json", (err, data) => {
         if (err) {
             res.send("file not readable...");
         } else {
             const users = JSON.parse(data);
-            if (users[username]) {
+            if (users[email]) {
                 res.send("user allready exits...");
             } else {
                 const user = {
-                    username, password, mobileNo
+                    username, password, email
                 };
-                users[username] = user;
+                users[email] = user;
                 fs.writeFile("./password.json", JSON.stringify(users), err => {
                     if (err) {
                         res.send("unable to user...");
                     } else {
-                        res.send("registerd succesfully...")
+                        res.send("Registered succesfully...")
                     }
                 })
             }
@@ -157,3 +157,27 @@ app.post("/adduser", (req, res) => {
     })
 })
 
+//add username & logout btn//
+
+app.get("/getuser", (req, res) => {
+    const email = req.session.email;
+    fs.readFile("./password.json", (err, data) => {
+        if (err) {
+            res.send("file not readable...");
+        } else {
+            const users = JSON.parse(data);
+            const user = users[email];
+            if (!user) {
+                res.send("User Not Found...");
+            } else {
+                res.send(user.username);
+            }
+        }
+    })
+})
+
+app.get("/logout", (req, res) => {
+    req.session.isLoggedIn = false;
+    delete req.session.email;
+    res.redirect("/")
+})

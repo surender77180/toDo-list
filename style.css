@@ -42,3 +42,20 @@ form{
     height: 100%;
     margin: 0 1em;
 }
+
+h2{
+    display: flex;
+    justify-content: space-between;
+    padding: 0em 1em;
+    color: red;
+}
+
+h2 a{
+    justify-content: end;
+    border: 4px solid black;
+    border-radius: 0.4em;
+    padding: 0.1em 0.3em;
+    text-decoration: none;
+    background: white;
+    color: red;
+}

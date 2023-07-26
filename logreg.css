@@ -1,0 +1,31 @@
+body {
+    background: lightgray;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 3em;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.reg-title input {
+    border-radius: 0.6em;
+    width: 20vw;
+    margin-bottom: 1em;
+    padding: 0.3em 1em;
+    font-size: large;
+}
+
+.reg-btn{
+    font-size: large;
+    align-items: center;
+}
+
+.reg-btn input {
+    padding: 0.6em 2em;
+    font-size: large;
+    border: 2px solid;
+    border-radius: 0.6em;
+}

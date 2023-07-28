@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>todo-list</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <h1 class="display">TODO LIST</h1>
+
+    <h2>
+        <% if(logingInUser){ %>
+            <p style="color: red;">Welcome, <%= logingInUser %></p>
+        <% } else { %>
+            <p>Welcome, Guest!</p>
+        <% } %>
+
+        <a href="/logout">Logout</a>
+    </h2>
+
+    <form action="/item" method="post" id="form_task" class="container display">
+        <input type="text" name="task" size="100px" required />
+        <input type="submit" value="Add" class="btn" />
+    </form>
+
+    <div id="task_list-constainer" class="show-data btn">
+        <ul id="task_list">
+            <% for (const id in items) {let item= items[id]; %>
+            <form class="toDo-add-item">
+                <span 
+                style='text-decoration: <%= item.isDone? "line-through":"underline" %>;'><%= item.task %></span>
+                <div>
+                  <input type="checkbox" class="checkbox" 
+                  <%= item.isDone? "checked":"" %> 
+                  onclick="location.href='/checkitem/<%= item.id %>/<%= item.isDone %>'" />
+                  <a href="/delitem/<%= item.id %>">X</a>
+                  </div>
+            </form>
+            <% } %>
+        </ul>
+    </div>
+</body>
+</html>

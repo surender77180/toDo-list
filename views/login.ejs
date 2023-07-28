@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>registration_page</title>
+    <link rel="stylesheet" href="./logreg.css" />
+</head>
+
+<body>
+    <h1>Login_Page</h1>
+    <form action="/login" method="POST">
+        <div class="reg-title">
+            <input type="email" name="email" required />
+            <label>Email</label><br>
+            <input type="password" name="password" required />
+            <label>Password</label><br>
+        </div>
+        <div class="reg-btn">
+            <input type="submit" value="Log-In" />
+            <a href="/reg">Register her...</a>
+        </div>
+
+        <% if (error) { %>
+            <p style="color: red;" ><%= error %></p>
+        <% } %>
+    </form>
+    <script src="./server.js" type="module"></script>
+</body>
+
+</html>

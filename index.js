@@ -88,15 +88,3 @@ function fetchAndShowList() {
 }
 
 fetchAndShowList();
-
-const usernameElem = document.getElementById("username");
-// const logoutButton = document.getElementById("logout");
-
-fetch("/getuser")
-.then(res=> res.text())
-.then(username=> {
-    usernameElem.textContent= username.charAt(0).toUpperCase()+ username.slice(1);
-});
-// logoutButton.onclick=()=>{
-//    location.href="/logout"
-// }

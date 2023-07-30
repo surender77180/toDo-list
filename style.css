@@ -1,32 +1,32 @@
 body {
     background: lightgray;
-  }
+}
 
-.display{
+.display {
     display: flex;
     justify-content: center;
-} 
-  
-h1{
+}
+
+h1 {
     font-size: 3em;
     font-family: 'Times New Roman', Times, serif;
 }
 
-.container input{
+.container input {
     border-radius: 0.6em;
     margin: 0px 10px;
     font-size: 1em;
 }
 
-.show-data{
+.show-data {
     font-size: 2.3em;
 }
 
-.btn{
-    padding: 0.5em 1em ;
+.btn {
+    padding: 0.5em 1em;
 }
 
-form{
+form {
     display: flex;
     justify-content: center;
     gap: 1.5em;
@@ -34,23 +34,23 @@ form{
     height: 2em;
 }
 
-.checkbox{
+.checkbox {
     transform: scale(2.6);
 }
 
-.del-btn{
+.del-btn {
     padding: 0.5em 1em;
     height: 100%;
     margin: 0 1em;
 }
 
-h2{
+h2 {
     display: block;
     padding: 0em 1em;
     color: red;
 }
 
-h2 a{
+h2 a {
     justify-content: end;
     border-radius: 0.4em;
     padding: 0.1em 0.3em;
@@ -59,11 +59,11 @@ h2 a{
     color: #0064ff;
 }
 
-form a{
+form a {
     text-decoration: none;
     padding: 0em 0.4em;
 }
 
-.toDo-add-item{
+.toDo-add-item {
     text-transform: capitalize;
 }

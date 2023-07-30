@@ -9,38 +9,31 @@
 </head>
 
 <body>
-    <h1 class="display">TODO LIST</h1>
+    <%- include("./header") %>
 
-    <h2>
-        <% if(logingInUser){ %>
-            <p style="color: red;">Welcome, <%= logingInUser %></p>
-        <% } else { %>
-            <p>Welcome, Guest!</p>
-        <% } %>
+        <form action="/item" method="post" enctype="multipart/form-data" id="form_task" class="container display">
+            <input type="text" name="task" size="100px" required />
+            <input type="submit" value="Add" class="btn" />
+            <input type="file" name="pic" />
+        </form>
 
-        <a href="/logout">Logout</a>
-    </h2>
-
-    <form action="/item" method="post" id="form_task" class="container display">
-        <input type="text" name="task" size="100px" required />
-        <input type="submit" value="Add" class="btn" />
-    </form>
-
-    <div id="task_list-constainer" class="show-data btn">
-        <ul id="task_list">
-            <% for (const id in items) {let item= items[id]; %>
-            <form class="toDo-add-item">
-                <span 
-                style='text-decoration: <%= item.isDone? "line-through":"underline" %>;'><%= item.task %></span>
-                <div>
-                  <input type="checkbox" class="checkbox" 
-                  <%= item.isDone? "checked":"" %> 
-                  onclick="location.href='/checkitem/<%= item.id %>/<%= item.isDone %>'" />
-                  <a href="/delitem/<%= item.id %>">X</a>
-                  </div>
-            </form>
-            <% } %>
-        </ul>
-    </div>
+        <div id="task_list-constainer" class="show-data btn">
+            <ul id="task_list">
+                <% for (const id in items) {let item=items[id]; %>
+                    <form class="toDo-add-item">
+                        <span style='text-decoration: <%= item.isDone? "line-through":"underline" %>;'>
+                            <%= item.task %>
+                        </span>
+                        <div>
+                            <img src="<%= item.imgPath %>" width="80px" />
+                            <input type="checkbox" class="checkbox" <%=item.isDone? "checked" :"" %>
+                            onclick="location.href='/checkitem/<%= item.id %>/<%= item.isDone %>'" />
+                                    <a href="/delitem/<%= item.id %>">X</a>
+                        </div>
+                    </form>
+                    <% } %>
+            </ul>
+        </div>
 </body>
+
 </html>

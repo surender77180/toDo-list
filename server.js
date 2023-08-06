@@ -4,20 +4,37 @@ const session = require("express-session");
 const path = require("path");
 const fs = require("fs");
 const app = express();
+
 const multer = require("multer");
 const { render } = require("ejs");
-const upload = multer({ dest: "uploads/" })
+const { mongo } = require("mongoose");
+const upload = multer({ dest: "public/" });
 
+// const {MongoClient} = require("mongodb"); 
 
 const port = 4567;
 app.set("view engine", "ejs");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/public", express.static(path.join(__dirname, "public")));
 // single can use single file upload
 // array can use multiple file upload
 app.use(upload.single("pic")); //middle ware
 app.use(express.json()); //middle ware//
 app.use(express.urlencoded({ extended: true }));
 
+// async function main(){
+//     const uri = "mongodb+srv://admin:python@<your-cluster-url>/test?retryWrites=true&w=majority";
+    
+//     const client = new MongoClient(uri);
+//     try{
+//         await client.connect();
+//         await listDatabases(client);
+//     }catch(err){
+//         console.log(err);
+//     }finally{
+//         await client.close();
+//     }
+// }
+// main().catch(console.error);
 
 app.use(session({
     secret: "i love this my village..",
@@ -204,6 +221,7 @@ app.get("/checkitem/:id/:isDone", (req, res) => {
 app.get("/delitem/:id", (req, res) => {
     const { params: { id } } = req;
     const email = req.session.email;
+    item.imgPath = req.file.path;
     const item = Item.findItem(email, id);
     if (!item) {
         res.sendStatus(404);
@@ -259,5 +277,6 @@ app.get("/showname/:name", (req, res) => {
 })
 
 
-
-app.listen(port);
+// db.init().then(function () {
+    app.listen(port);
+// })

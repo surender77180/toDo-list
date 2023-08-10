@@ -1,3 +1,4 @@
+const { getUsersCollection, getListCollection } = require("./models/db");
 const exp = require("constants");
 const express = require("express");
 const session = require("express-session");
@@ -7,10 +8,9 @@ const app = express();
 
 const multer = require("multer");
 const { render } = require("ejs");
-const { mongo } = require("mongoose");
+
 const upload = multer({ dest: "public/" });
 
-// const {MongoClient} = require("mongodb"); 
 
 const port = 4567;
 app.set("view engine", "ejs");
@@ -21,20 +21,6 @@ app.use(upload.single("pic")); //middle ware
 app.use(express.json()); //middle ware//
 app.use(express.urlencoded({ extended: true }));
 
-// async function main(){
-//     const uri = "mongodb+srv://admin:python@<your-cluster-url>/test?retryWrites=true&w=majority";
-    
-//     const client = new MongoClient(uri);
-//     try{
-//         await client.connect();
-//         await listDatabases(client);
-//     }catch(err){
-//         console.log(err);
-//     }finally{
-//         await client.close();
-//     }
-// }
-// main().catch(console.error);
 
 app.use(session({
     secret: "i love this my village..",
@@ -59,21 +45,25 @@ serverFile("/index.js", "index.js");
 class Item {
     static list = {};
 
-    static findItem(email, id) {
-        const items = Item.getItems(email);
+    static async findItem(toDoListId, id) {
+        const items = await Item.getItems(toDoListId);
         return items[id];
     }
-    static addItem(email, item) {
+    static async addItem(taskListId, task) {
         try {
-            const data = fs.readFileSync("data.json");
-            const useritems = JSON.parse(data);
-            if (!(email in useritems)) {
-                useritems[email] = "{}";
-            }
-            const items = JSON.parse(useritems[email]);
-            items[item.id] = item;
-            useritems[email] = JSON.stringify(items);
-            fs.writeFileSync("data.json", JSON.stringify(useritems));
+            const listDb = await getListCollection();
+            await listDb.updateOne({ _id: taskListId }, { $set: { [task.id]: task } });
+            return true;
+
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }
+    static async delItem(taskListId, taskId) {
+        try {
+            const listDb = await getListCollection();
+            await listDb.updateOne({ _id: taskListId }, { $unset: { [taskId]: "" } });
             return true;
 
         } catch (err) {
@@ -82,43 +72,19 @@ class Item {
         }
     }
 
-    static delItem(email, id) {
+    static async getItems(taskListId) {
         try {
-            const data = fs.readFileSync("data.json");
-            const useritems = JSON.parse(data);
-            if (!(email in useritems)) {
-                useritems[email] = "{}";
-            }
-            const items = JSON.parse(useritems[email]);
-            delete items[id];
-            useritems[email] = JSON.stringify(items);
-            fs.writeFileSync("data.json", JSON.stringify(useritems));
-            return true;
-
+            const listDb = await getListCollection();
+            const list = await listDb.findOne({ _id: taskListId });
+            return list;
         } catch (err) {
             console.log(err);
-            return false;
+            return null;
         }
     }
 
     static genRandomId() {
         return (10000 + Math.floor(Math.random() * 9999)).toString(16);
-    }
-    static getItems(email) {
-        try {
-            const data = fs.readFileSync("data.json");
-            const useritems = JSON.parse(data);
-
-            if (!(email in useritems)) {
-                useritems[email] = "[]";
-            }
-            // console.log(useritems, email);
-            return JSON.parse(useritems[email]);
-
-        } catch (err) {
-            console.log(err);
-            return null;
-        }
     }
 
     constructor(task) {
@@ -130,12 +96,12 @@ class Item {
 };
 
 // if user exists, return user, else undefined(means user doesnt exists.)
-function getUser(email) {
+async function getUser(email) {
     try {
-        const data = fs.readFileSync("./password.json");
-        const users = JSON.parse(data);
-        const user = users[email];
+        const db = await getUsersCollection();
+        const user = await db.findOne({ email });
         return user;
+
     } catch (err) {
         console.log("some error occured:", err);
         return null;
@@ -143,17 +109,19 @@ function getUser(email) {
 }
 
 // if user saved succesfully, then returns true, else false
-function saveUser(user) {
+async function saveUser(user) {
     try {
-        const data = fs.readFileSync("./password.json");
-        const users = JSON.parse(data);
+        const usersDb = await getUsersCollection();
+        const result = await usersDb.findOne({ email: user.email });
 
-        if (user.email in users) {
+        if (result) {
             return false;
         } else {
-            users[user.email] = user;
+            const listDb = await getListCollection();
+            const list = await listDb.insertOne({});
+            user.toDoListId = list.insertedId;
+            await usersDb.insertOne(user);
         }
-        fs.writeFileSync("./password.json", JSON.stringify(users));
         return true;
     } catch (err) {
         console.log("some error occured:", err);
@@ -167,18 +135,17 @@ app.get("/reg", (req, res) => {
 })
 
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
 
     if (req.session.isLoggedIn) {
-        // console.log(req.session.username);
-        // res.sendFile(path.join(__dirname, "index.html"));
         const email = req.session.email;
 
-        const user = getUser(email);
+        const user = await getUser(email);
         if (!user) {
             res.send("User not Found...");
         } else {
-            const items = Item.getItems(email);
+            const items = await Item.getItems(user.toDoListId) || { _id: "" };
+            delete items["_id"];
             const showName = user.username.charAt(0).toUpperCase() + user.username.slice(1)
             res.render("index", { logingInUser: showName, items });
         }
@@ -193,50 +160,55 @@ app.get("/login", (req, res) => {
 });
 
 
-app.post("/item", (req, res) => {
+app.post("/item", async (req, res) => {
     const task = req.body.task;
-    console.log(req.file);
+    // console.log(req.file);
     const email = req.session.email;
+    const user = await getUser(email);
     const item = new Item(task);
     item.imgPath = req.file.path;
-    Item.addItem(email, item);
+    await Item.addItem(user.toDoListId, item);
     res.redirect("/");
 });
 
 
-app.get("/checkitem/:id/:isDone", (req, res) => {
+app.get("/checkitem/:id/:isDone", async (req, res) => {
     const { params: { id, isDone } } = req;
     const email = req.session.email;
-    const item = Item.findItem(email, id);
+    const user = await getUser(email);
+
+    const item = await Item.findItem(user.toDoListId, id);
     if (!item) {
         res.sendStatus(404);
     } else {
         item.isDone = !JSON.parse(isDone);
-        Item.addItem(email, item);
+        await Item.addItem(user.toDoListId, item);
         res.redirect("/");
     }
 });
 
 
-app.get("/delitem/:id", (req, res) => {
+app.get("/delitem/:id", async (req, res) => {
     const { params: { id } } = req;
     const email = req.session.email;
-    item.imgPath = req.file.path;
-    const item = Item.findItem(email, id);
+    const user = await getUser(email);
+    const item = await Item.findItem(user.toDoListId, id);
+
     if (!item) {
         res.sendStatus(404);
     } else {
-        Item.delItem(email, id);
+        await fs.promises.rm(item.imgPath);
+        await Item.delItem(user.toDoListId, id);
         res.redirect("/");
     }
 });
 
 // authorise session//
-app.post("/login", function (req, res) {
+app.post("/login", async function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
-    const user = getUser(email);
+    const user = await getUser(email);
     if (!user) {
         res.render("login", { error: "Invalid username..." });
     } else if (password != user.password) {
@@ -249,15 +221,15 @@ app.post("/login", function (req, res) {
 });
 
 //register new user//
-app.post("/adduser", (req, res) => {
+app.post("/adduser", async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     const email = req.body.email;
 
     const user = {
-        username, password, email
+        username, password, email, toDoListId: null
     };
-    const success = saveUser(user);
+    const success = await saveUser(user);
     if (!success) {
         res.render("login", { error: "Email already registerd" });
     } else {
@@ -277,6 +249,4 @@ app.get("/showname/:name", (req, res) => {
 })
 
 
-// db.init().then(function () {
-    app.listen(port);
-// })
+app.listen(port);
